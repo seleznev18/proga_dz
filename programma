@@ -1,0 +1,436 @@
+import os.path
+import calendar
+path=os.path.abspath('programma.txt')
+path=path.replace('programma.txt','Data.txt')
+if os.path.exists(path)==True:
+    a=open('Data.txt','r+',encoding='utf-8')
+else:
+    a=open('Data.txt','w+',encoding='utf-8')
+def check_data():
+    arr=[]
+    while True:
+        b=a.readline()
+        if b!='':
+            arr.append(list(b.split()))
+        else:
+            break
+    return arr
+main_data=check_data()
+def check_name(x):
+    ban='~`!@"#$%?^&*+|}\/{[];<>=.,'
+    while True:
+        flag=True
+        for i in range(len(x)):
+            if x[i] in ban:
+                flag=False
+                break
+        if len(x)==0:
+            flag=False
+        if flag==False:
+            x=input('Неправильный ввод названия, введите заново:')
+        else:
+            x=x.split()
+            if len(x)>1:
+                x=('Неправильный ввод названия, введите заново:')
+            else:
+                x=x[0]
+                break
+    return x
+def check_date(x):
+    x=x.replace(' ','')
+    date=list(x.split('.'))
+    not_ban='0123456789.'
+    while True:
+        if len(date)!=3:
+            date=input('Неправильный ввод даты, введите заново в формате dd.mm.yyyy:')
+            date=date.replace(' ','')
+            date=list(date.split('.'))
+        else:
+            flag=True
+            for j in range(3):
+                for z in date[j]:
+                    if not(z in not_ban):
+                        flag=False
+                        break
+            if flag==False:
+                date=input('Неправильный ввод даты, введите заново в формате dd.mm.yyyy:')
+                date=date.replace(' ','')
+                date=list(date.split('.'))
+            else:
+                break
+    day,month,year=date[0],date[1],date[2]
+    days_quantity=[31,28,31,30,31,30,31,31,30,31,30,31]
+    if calendar.isleap(int(year)):
+        days_quantity[1]+=1
+    while True:
+        year=year.replace(' ','')
+        if len(year)==0 or check_num(str(year))==False or int(year)>2150 or int(year)<1500:
+            year=input('Неправильный ввод года, введите заново в формате yyyy:')
+        else:
+            break
+    while True:
+        month=month.replace(' ','')
+        if len(month)==0 or check_num(str(month))==False or int(month)<1 or int(month)>12:
+            month=input('Неправильный ввод месяца, введите заново в формате mm:')
+        else:
+            break
+    while True:
+        day=day.replace(' ','')
+        if len(day)==0 or check_num(day)==False or int(day)>days_quantity[int(month)-1] or int(day)<1:
+            day=input('Неправильный ввод числа месяца, введите заново в формате dd:')
+        else:
+            break
+    ans=str(day)+'.'+str(month)+'.'+str(year)
+    return ans
+def check_num(x):
+    x=str(x)
+    x=x.replace(' ','')
+    not_ban='0123456789.,'
+    flag=True
+    for i in x:
+        if not(i in not_ban):
+            flag=False
+            break
+    return flag
+def add_data(main_data):
+    d=list(input('Введите название продукта, категорию , дату покупки в формате dd.mm.yyyy и цену через пробелы \nЕсли навзание продукта или категория состоит из нескольких слов, то используйте нижнее подчеркивание между словами, например "мышь_игровая"\nЧтобы выйти из функции - введите минус:').split())
+    while True:
+        if len(d)!=4:
+            if len(d)!=0:
+                d[0]=d[0].replace(' ','')
+                if d[0]=='-' or d[0]=='-':
+                    return main_data
+            d=list(input('Неправильный ввод, введите информацию заново:').split())
+        else:
+            d[0]=check_name(d[0])
+            d[1]=check_name(d[1])
+            d[2]=check_date(d[2])
+            while True:
+                if check_num(d[3])==False or len(d[3])==0:
+                    d[3]=input('Неправильный ввод цены, введите заново:')
+                else:
+                    break
+            d[3]=d[3].replace(',','.')
+            d[3]=d[3].replace(' ','')
+            break
+    main_data.append([d[0],d[1],d[2],d[3]])
+    return main_data
+def delete_data(main_data):
+    if len(main_data)==0:
+        print('Нет записей для удаления')
+        return main_data
+    else:
+        print('Какую запись вы хотели бы удалить?\nЕсли хотите удалить несколько покупок - запишите их через запятую:')
+        print('Название Категория Дата Цена')
+        for i in range(len(main_data)):
+            print(i+1,'-',main_data[i][0],main_data[i][1],main_data[i][2],main_data[i][3])
+        print(len(main_data)+1,'- Все записи')
+        print(len(main_data)+2,'- Выход из функции')
+        d=input('Введите номера записей, которые хотите удалить:')
+        sure_delete=set()
+        d=d.replace(' ','')
+        delete=d.split(',')
+        while True:
+            d=d.replace(' ','')
+            delete=d.split(',')
+            flag_check=True
+            for i in range(len(delete)):
+                if check_num(delete[i])==False or len(delete[i])==0 or  ',' in delete[i] or '.' in delete[i] or int(delete[i])>len(main_data)+2 or int(delete[i])<1:
+                    flag_check=False
+                    break
+            if flag_check==False:
+                d=input('Неверный ввод, попробуйте заново:')
+            else:
+                break
+        delete=list(map(int,delete))
+        if len(main_data)+1 in delete:
+            main_data=[]
+            return main_data
+        elif len(main_data)+2 in delete:
+            return main_data
+        else:
+            for i in delete:
+                z=tuple(main_data[i-1])
+                sure_delete.add(z)
+            for i in sure_delete:
+                z=list(i)
+                main_data.remove(z)
+            return main_data
+def print_all(main_data):
+    if len(main_data)==0:
+        print('Нет записей')
+    else:
+        print('Все записи в порядке добавления:')
+        print('Название Категория Дата Цена')
+        for i in range(len(main_data)):
+            print(i+1,'-',main_data[i][0],main_data[i][1],main_data[i][2],main_data[i][3])
+def print_date(main_data):
+    if len(main_data)==0:
+        print('Нет записей')
+    else:
+        x=input('Введите дату, за которую хотите увидеть записи\nЧтобы выйти из функции - введите минус:')
+        x=x.replace(' ','')
+        if x=='-' or x=='-':
+            return
+        x=check_date(x)
+        flag=False
+        for i in range(len(main_data)):
+            if main_data[i][2]==x:
+                if flag==False:
+                    print('Название Категория Дата Цена')
+                print(i+1,'-',main_data[i][0],main_data[i][1],main_data[i][2],main_data[i][3])
+                flag=True
+        if flag==False:
+            print('В указанную дату не было записей')
+def print_cat(main_data):
+    if len(main_data)==0:
+        print('Нет записей')
+    else:
+        x=input('Введите категорию, из которой хотите увидеть записи\nЧтобы выйти из функции - введите минус:')
+        x=x.replace(' ','')
+        if x=='-' or x=='-':
+            return
+        x=check_name(x)
+        flag=False
+        for i in range(len(main_data)):
+            if main_data[i][1].lower()==x.lower():
+                if flag==False:
+                    print('Название Категория Дата Цена')
+                print(i+1,'-',main_data[i][0],main_data[i][1],main_data[i][2],main_data[i][3])
+                flag=True
+        if flag==False:
+            print('В указанной категории нет записей')
+def print_date_sorted_mintmax(main_data):
+    if len(main_data)==0:
+        print('Нет записей')
+    else:
+        tmp_data=main_data.copy()
+        for i in range(len(tmp_data)):
+            for j in range(len(tmp_data)):
+                if i!=j:
+                    di=tmp_data[i][2]
+                    dj=tmp_data[j][2]
+                    dayi=di[0]+di[1]
+                    dayj=dj[0]+dj[1]
+                    monthi=di[3]+di[4]
+                    monthj=dj[3]+dj[4]
+                    yeari=di[6]+di[7]+di[8]+di[9]
+                    yearj=dj[6]+dj[7]+dj[8]+dj[9]
+                    if yeari>yearj:
+                        tmp=tmp_data[j]
+                        tmp_data[j]=tmp_data[i]
+                        tmp_data[i]=tmp
+                    elif yeari==yearj and monthi>monthj:
+                        tmp=tmp_data[j]
+                        tmp_data[j]=tmp_data[i]
+                        tmp_data[i]=tmp
+                    elif yeari==yearj and monthi==monthj and dayi>dayj:
+                        tmp=tmp_data[j]
+                        tmp_data[j]=tmp_data[i]
+                        tmp_data[i]=tmp
+        print('Записи, отсортированные по дате от минимальной к максимальной:')
+        print('Название Категория Дата Цена')
+        for i in range(len(tmp_data)):
+            print(i+1,'-',tmp_data[i][0],tmp_data[i][1],tmp_data[i][2],tmp_data[i][3])
+def print_price_sorted_maxtmin(main_data):
+    if len(main_data)==0:
+        print('Нет записей')
+    else:
+        tmp_data=main_data.copy()
+        for i in range(len(tmp_data)):
+            for j in range(len(tmp_data)):
+                if i!=j:
+                    if float(tmp_data[i][3])>float(tmp_data[j][3]):
+                        tmp=tmp_data[j]
+                        tmp_data[j]=tmp_data[i]
+                        tmp_data[i]=tmp
+        print('Записи, отсортированные по цене от максимальной к минимальной:')
+        print('Название Категория Дата Цена')
+        for i in range(len(tmp_data)):
+            print(i+1,'-',tmp_data[i][0],tmp_data[i][1],tmp_data[i][2],tmp_data[i][3])
+def print_price_sorted_mintmax(main_data):
+    if len(main_data)==0:
+        print('Нет записей')
+    else:
+        tmp_data=main_data.copy()
+        for i in range(len(tmp_data)):
+            for j in range(len(tmp_data)):
+                if i!=j:
+                    if float(tmp_data[i][3])<float(tmp_data[j][3]):
+                        tmp=tmp_data[j]
+                        tmp_data[j]=tmp_data[i]
+                        tmp_data[i]=tmp
+        print('Записи, отсортированные по цене от минимальной к максимальной:')
+        print('Название Категория Дата Цена')
+        for i in range(len(tmp_data)):
+            print(i+1,'-',tmp_data[i][0],tmp_data[i][1],tmp_data[i][2],tmp_data[i][3])
+def print_cat_sorted_alph(main_data):
+    if len(main_data)==0:
+        print('Нет записей')
+    else:
+        tmp_data=main_data.copy()
+        for i in range(len(tmp_data)):
+            for j in range(len(tmp_data)):
+                if i!=j:
+                    if tmp_data[i][1].lower()<tmp_data[j][1].lower():
+                        tmp=tmp_data[j]
+                        tmp_data[j]=tmp_data[i]
+                        tmp_data[i]=tmp
+                    elif tmp_data[i][1].lower()==tmp_data[j][1].lower() and tmp_data[i][0].lower()<tmp_data[j][0].lower():
+                        tmp=tmp_data[j]
+                        tmp_data[j]=tmp_data[i]
+                        tmp_data[i]=tmp
+        print('Записи, отсортированные по категориям в алфовитном порядке:')
+        print('Название Категория Дата Цена')
+        for i in range(len(tmp_data)):
+            print(i+1,'-',tmp_data[i][0],tmp_data[i][1],tmp_data[i][2],tmp_data[i][3])
+print('Добро пожаловать!Данная программа может помочь вам систематизировать ваши покупки.')
+def interface(main_data):
+    print('Выберите одну из функций, описанных ниже, введя её номер в консоль:')
+    print('1-Добавление покупки')
+    print('2-Удаление покупки(всех покупок)')
+    print('3-Вывод всех записей в порядке введения')
+    print('4-Вывод всех записей, сортированных по дате')
+    print('5-Вывод всех записей, сделанных в выбранную дату')
+    print('6-Вывод всех записей, сортированных по категориям')
+    print('7-Вывод всех записей, принадлежащих к выбранной категории')
+    print('8-Вывод всех записей, сортированных по цене от минимальной к максимальной')
+    print('9-Вывод всех записей, сортированных по цене от максимальной к минимальной')
+    print('0-Выход из программы')
+    x=input()
+    x=x.replace(' ','')
+    allowed='0123456789'
+    while True:
+        if not(x in allowed):
+            x=input('Неправильный ввод, попробуйте заново:')
+        else:
+            if len(x)!=1:
+               x=input('Неправильный ввод, попробуйте заново:')
+            else:
+                break
+    if x=='1':
+        main_data=add_data(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='2':
+        main_data=delete_data(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='3':
+        b=print_all(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='4':
+        b=print_date_sorted_mintmax(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='5':
+        b=print_date(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='6':
+        b=print_cat_sorted_alph(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='7':
+        b=print_cat(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='8':
+        b=print_price_sorted_mintmax(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='9':
+        b=print_price_sorted_maxtmin(main_data)
+        z=input('Желаете продолжить работу?(+ или -):')
+        while True:
+            z=z.replace(' ','')
+            if z=='+' or z=='-' or z=='-':
+                break
+            else:
+               z=input('Неправильный ввод, попробуйте заново(+ или -):') 
+        if z=='+':
+            return interface(main_data)
+        else:
+            x='0'
+    if x=='0':
+        a.close()
+        k=open('Data.txt','w+',encoding='utf-8')
+        for i in range(len(main_data)):
+            ans=main_data[i][0]+' '+main_data[i][1]+' '+main_data[i][2]+' '+main_data[i][3]+'\n'
+            k.write(ans)
+        k.close()
+        print('Спасибо за использование!Записи, сделанные во время этой сессии, будут сохранены и использованы при следующем запуске программы.')
+c=interface(main_data)        
